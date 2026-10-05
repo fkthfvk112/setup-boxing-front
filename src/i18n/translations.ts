@@ -572,7 +572,7 @@ export const translations: Record<Language, Translations> = {
     tokenLimitUltimateMessage: 'ULTIMATE 등급에서는 한 콤보에 최대 {max}개 토큰까지 추가할 수 있습니다.',
     maxCombosLimitTitle: '콤보 저장 한도 도달',
     maxCombosLimitMessage: '무료 버전에서는 최대 {max}개의 콤보만 저장할 수 있습니다. PRO 업그레이드 시 무제한 저장이 가능합니다.',
-    upgradeToPro: 'PRO 혜택 보기',
+    upgradeToPro: 'PRO 혜택',
     upgrade: '업그레이드',
     proBadge: 'PRO',
     freeBadge: 'FREE',

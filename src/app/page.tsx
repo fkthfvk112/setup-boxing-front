@@ -291,14 +291,14 @@ export default function HomeScreen() {
           />
           <div>
             <div className="flex items-center gap-1.5">
-              <h1 className="text-[20px] font-black text-[#F8FAFC] tracking-tight leading-none">
+              <h1 className="text-[16px] font-black text-[#F8FAFC] tracking-tight leading-none">
                 {t('appTitle')}
               </h1>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#FF2E54]/15 border border-[#FF2E54]/30 text-[#FF2E54] leading-none">
+              <span className="px-1.5 py-0.5 rounded text-[6px] font-black uppercase tracking-wider bg-[#FF2E54]/15 border border-[#FF2E54]/30 text-[#FF2E54] leading-none">
                 beta
               </span>
             </div>
-            <p className="text-[11px] text-[#94A3B8] font-semibold mt-1">
+            <p className="text-[8px] text-[#94A3B8] font-semibold mt-1">
               {t('appSubtitle')}
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function HomeScreen() {
             <button
               type="button"
               onClick={() => openPaywall('home_header')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-extrabold transition-all active:scale-95 ${
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[11px] font-extrabold transition-all active:scale-95 ${
                 tier === 'ULTIMATE'
                   ? 'bg-[#FFD700]/15 border-[#FFD700]/50 text-[#FFD700] hover:bg-[#FFD700]/25'
                   : tier === 'PRO'
@@ -317,18 +317,7 @@ export default function HomeScreen() {
                   : 'bg-gradient-to-r from-[#FF2E54] to-[#FF5E7E] border-[#FF2E54] text-white shadow-md shadow-[#FF2E54]/30 hover:shadow-lg hover:shadow-[#FF2E54]/50 hover:brightness-110'
               }`}
             >
-              {tier === 'FREE' ? (
-                <Sparkles className="w-3.5 h-3.5 fill-white text-white animate-pulse" />
-              ) : (
-                <Crown
-                  className={`w-3.5 h-3.5 ${
-                    tier === 'ULTIMATE'
-                      ? 'text-[#FFD700] fill-[#FFD700]'
-                      : 'text-[#FF2E54] fill-[#FF2E54]'
-                  }`}
-                />
-              )}
-              <span>
+              <span className='text-[8px]'>
                 {tier === 'ULTIMATE'
                   ? 'ULTIMATE'
                   : tier === 'PRO'
@@ -341,7 +330,7 @@ export default function HomeScreen() {
           <button
             type="button"
             onClick={handleOpenSettings}
-            className="p-2 rounded-xl bg-[#15171E] border border-[#282C3A] text-white hover:border-white/50 transition-colors"
+            className="p-1.5 rounded-xl bg-[#15171E] border border-[#282C3A] text-white hover:border-white/50 transition-colors"
           >
             <Settings className="w-5 h-5" />
           </button>
@@ -694,21 +683,21 @@ export default function HomeScreen() {
                 <span className="text-[10px] text-[#64748B]">1:1 Support &rarr;</span>
               </Link>
               <div className="flex items-center justify-between px-1 pt-1 text-[11px] text-[#64748B]">
-                <button
-                  type="button"
-                  onClick={() => setLegalModal({ isOpen: true, type: 'terms' })}
-                  className="hover:text-[#94A3B8] underline transition-colors cursor-pointer"
+                <Link
+                  href="/terms"
+                  onClick={() => setSettingsModalVisible(false)}
+                  className="hover:text-[#94A3B8] underline transition-colors"
                 >
                   {isKo ? '서비스 이용약관' : 'Terms of Service'}
-                </button>
+                </Link>
                 <span>•</span>
-                <button
-                  type="button"
-                  onClick={() => setLegalModal({ isOpen: true, type: 'privacy' })}
-                  className="hover:text-[#94A3B8] underline transition-colors cursor-pointer"
+                <Link
+                  href="/privacy"
+                  onClick={() => setSettingsModalVisible(false)}
+                  className="hover:text-[#94A3B8] underline transition-colors"
                 >
                   {isKo ? '개인정보 처리방침' : 'Privacy Policy'}
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -1117,13 +1106,6 @@ export default function HomeScreen() {
           </div>
         </div>
       )}
-
-      {/* Legal Modal Popup */}
-      <LegalModal
-        isOpen={legalModal.isOpen}
-        type={legalModal.type}
-        onClose={() => setLegalModal((prev) => ({ ...prev, isOpen: false }))}
-      />
     </div>
   );
 }

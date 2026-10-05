@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useI18n } from '../../hooks/useI18n';
+import { useEntitlements } from '../../context/EntitlementContext';
 import { showAlert } from '../../utils/swal';
 import LegalModal, { LegalModalType } from '../../components/legal/LegalModal';
 
@@ -37,12 +39,20 @@ function KakaoIcon({ className = 'w-4 h-4' }: { className?: string }) {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const { t, language } = useI18n();
+  const { isAuthenticated, authReady } = useEntitlements();
   const isKo = language === 'ko';
   const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalModalType }>({
     isOpen: false,
     type: 'terms',
   });
+
+  useEffect(() => {
+    if (authReady && isAuthenticated) {
+      router.replace('/');
+    }
+  }, [authReady, isAuthenticated, router]);
 
   const handleGoogleLogin = (e?: React.MouseEvent | React.TouchEvent) => {
     if (e) e.stopPropagation();
@@ -95,6 +105,8 @@ export default function LoginPage() {
       showAlert(isKo ? '오류' : 'Error', isKo ? '에러가 발생하였습니다.' : 'An error occurred.', 'error');
     }
   };
+
+  if (authReady && isAuthenticated) return null;
 
   return (
     <div className="max-w-md w-full mx-auto my-12 bg-[#15171E] border border-[#282C3A] rounded-3xl p-6 md:p-8 shadow-2xl text-center space-y-6">

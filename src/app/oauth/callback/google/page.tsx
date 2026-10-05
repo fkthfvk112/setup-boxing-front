@@ -53,10 +53,6 @@ function GoogleCallbackContent() {
         });
 
         if (res.data && res.data.accessToken) {
-          localStorage.setItem('boxing_access_token', res.data.accessToken);
-          if (res.data.user) {
-            localStorage.setItem('boxing_user', JSON.stringify(res.data.user));
-          }
           loginAction({
             accessToken: res.data.accessToken,
             refreshToken: res.data.refreshToken,

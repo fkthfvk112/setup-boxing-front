@@ -24,8 +24,6 @@ import {
 import { useEntitlements } from '../../context/EntitlementContext';
 import { useI18n } from '../../hooks/useI18n';
 import {
-  getUserProfile,
-  UserProfileData,
   getWorkoutLogs,
   WorkoutLog,
   getAppSettings,
@@ -33,21 +31,20 @@ import {
   AppSettings,
   saveLanguageSetting,
 } from '../../utils/webDb';
-import { paymentApi } from '../../lib/api';
+import { authApi, paymentApi } from '../../lib/api';
 import { showAlert, showConfirmDialog } from '../../utils/swal';
 import AuthGuard from '../../components/auth/AuthGuard';
 import LegalModal, { LegalModalType } from '../../components/legal/LegalModal';
 
 export default function ProfilePage() {
   const { t, language, setLanguage } = useI18n();
-  const { tier, isPro, isUltimate, limits, openPaywall, setTier, refreshUser } = useEntitlements();
+  const { tier, isPro, isUltimate, limits, openPaywall, setTier, logout, user: userProfile } = useEntitlements();
   const isKo = language === 'ko';
   const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalModalType }>({
     isOpen: false,
     type: 'terms',
   });
 
-  const [userProfile, setUserProfile] = useState<UserProfileData | null>(null);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
@@ -59,11 +56,6 @@ export default function ProfilePage() {
   });
 
   const loadData = useCallback(async () => {
-    try {
-      const prof = await getUserProfile();
-      setUserProfile(prof);
-    } catch {}
-
     try {
       const workoutLogs = await getWorkoutLogs();
       setLogs(workoutLogs);
@@ -107,17 +99,32 @@ export default function ProfilePage() {
     });
 
     if (confirmed) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('boxing_access_token');
-        localStorage.removeItem('boxing_user');
-      }
-      await refreshUser();
+      logout();
       await loadData();
       await showAlert(
         t('logoutSuccessTitle'),
         t('logoutSuccessMessage'),
         'success'
       );
+    }
+  };
+
+  const handleWithdraw = async () => {
+    const confirmed = await showConfirmDialog({
+      title: t('withdrawConfirmTitle'),
+      text: t('withdrawConfirmText'),
+      confirmButtonText: t('withdrawAccount'),
+      cancelButtonText: t('cancel'),
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      await authApi.withdraw();
+      logout();
+      await showAlert(t('withdrawSuccessTitle'), t('withdrawSuccessMessage'), 'success');
+    } catch (err: any) {
+      await showAlert(t('error'), err?.message || t('withdrawConfirmTitle'), 'error');
     }
   };
 
@@ -471,9 +478,19 @@ export default function ProfilePage() {
           </button>
         </div>
 
+        {userProfile && (
+          <button
+            type="button"
+            onClick={handleWithdraw}
+            className="w-full py-2 text-[11px] font-bold text-[#64748B] hover:text-[#EF4444] transition-colors"
+          >
+            {t('withdrawAccount')}
+          </button>
+        )}
+
         {/* Footer Version */}
         <div className="text-center py-3 text-[11px] text-[#64748B] space-y-1">
-          <p>Setup Boxing v2.0 (Web Edition)</p>
+          <p>Setup Boxing v1.0.0 (Beta)</p>
           <p>© 2026 Setup Boxing. All rights reserved.</p>
         </div>
       </div>

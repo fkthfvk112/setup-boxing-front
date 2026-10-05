@@ -39,7 +39,7 @@ function KakaoIcon({ className = 'w-4 h-4' }: { className?: string }) {
 }
 
 export default function FastAuthModal() {
-  const { isAuthModalOpen, authModalReason, closeAuthModal } = useEntitlements();
+  const { isAuthModalOpen, authModalReason, closeAuthModal, isAuthenticated } = useEntitlements();
   const { t, language } = useI18n();
   const isKo = language === 'ko';
   const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalModalType }>({
@@ -47,7 +47,7 @@ export default function FastAuthModal() {
     type: 'terms',
   });
 
-  if (!isAuthModalOpen) return null;
+  if (!isAuthModalOpen || isAuthenticated) return null;
 
   const handleGoogleLogin = async () => {
     const GOOGLE_CLIENT_ID =

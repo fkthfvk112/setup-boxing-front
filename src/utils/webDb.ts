@@ -395,15 +395,16 @@ export async function saveLastPlaylist(playlist: { mode: 'sequential' | 'random'
 export async function getUserTier(): Promise<EntitlementTier> {
   if (!isClient()) return 'FREE';
 
-  // Sync tier from backend user info
-  try {
-    await ensureAuthToken();
-    const res = await authApi.getMe();
-    if (res && res.data && res.data.tier) {
-      localStorage.setItem(USER_TIER_KEY, res.data.tier);
-      return res.data.tier;
-    }
-  } catch {}
+  const token = await ensureAuthToken();
+  if (token) {
+    try {
+      const res = await authApi.getMe();
+      if (res && res.data && res.data.tier) {
+        localStorage.setItem(USER_TIER_KEY, res.data.tier);
+        return res.data.tier;
+      }
+    } catch {}
+  }
 
   try {
     const tier = localStorage.getItem(USER_TIER_KEY);

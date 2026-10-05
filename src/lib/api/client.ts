@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import { clearAuthSession } from '../../stores/authAtom';
 import { ApiError, ApiResponse } from './types';
 
 const getBackendUrl = () => {
@@ -60,8 +61,7 @@ axiosInstance.interceptors.response.use(
     };
 
     if (apiError.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('boxing_access_token');
-      localStorage.removeItem('boxing_user');
+      clearAuthSession();
     }
 
     return Promise.reject(apiError);

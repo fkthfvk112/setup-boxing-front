@@ -268,6 +268,11 @@ export interface Translations {
   logoutSuccessMessage: string;
   logoutConfirmTitle: string;
   logoutConfirmText: string;
+  withdrawAccount: string;
+  withdrawConfirmTitle: string;
+  withdrawConfirmText: string;
+  withdrawSuccessTitle: string;
+  withdrawSuccessMessage: string;
 
   // Profile & Settings
   tierTitleUltimate: string;
@@ -604,6 +609,11 @@ export const translations: Record<Language, Translations> = {
     logoutSuccessMessage: '성공적으로 로그아웃되었습니다.',
     logoutConfirmTitle: '로그아웃',
     logoutConfirmText: '정말 로그아웃 하시겠습니까?',
+    withdrawAccount: '회원 탈퇴',
+    withdrawConfirmTitle: '회원 탈퇴',
+    withdrawConfirmText: '탈퇴하면 계정이 비활성화되고 같은 계정으로 다시 로그인할 수 없습니다. 계속할까요?',
+    withdrawSuccessTitle: '탈퇴 완료',
+    withdrawSuccessMessage: '회원 탈퇴가 완료되었습니다.',
 
     // Profile & Settings
     tierTitleUltimate: '👑 ULTIMATE VIP 멤버',
@@ -938,6 +948,11 @@ export const translations: Record<Language, Translations> = {
     logoutSuccessMessage: 'Successfully logged out.',
     logoutConfirmTitle: 'Log Out',
     logoutConfirmText: 'Are you sure you want to log out?',
+    withdrawAccount: 'Delete account',
+    withdrawConfirmTitle: 'Delete account',
+    withdrawConfirmText: 'Your account will be deactivated and you will not be able to sign in with it again. Continue?',
+    withdrawSuccessTitle: 'Account deleted',
+    withdrawSuccessMessage: 'Your account has been withdrawn.',
 
     // Profile & Settings
     tierTitleUltimate: '👑 ULTIMATE VIP Member',

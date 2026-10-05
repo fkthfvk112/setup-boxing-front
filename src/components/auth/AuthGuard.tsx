@@ -50,13 +50,23 @@ export default function AuthGuard({
   title,
   description,
 }: AuthGuardProps) {
-  const { isAuthenticated } = useEntitlements();
+  const { isAuthenticated, authReady } = useEntitlements();
   const { t, language } = useI18n();
   const isKo = language === 'ko';
   const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalModalType }>({
     isOpen: false,
     type: 'terms',
   });
+
+  if (!authReady) {
+    return (
+      <div className="relative w-full flex-1 flex flex-col min-h-[calc(100vh-60px)]">
+        <div className="flex-1 flex flex-col filter blur-[6px] opacity-25 pointer-events-none select-none overflow-hidden max-h-[calc(100vh-60px)]" aria-hidden="true">
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     return <>{children}</>;

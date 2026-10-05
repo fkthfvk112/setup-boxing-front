@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Provider as JotaiProvider } from 'jotai';
+import { authStore } from '../stores/authAtom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nProvider } from '../hooks/useI18n';
 import { EntitlementProvider } from '../context/EntitlementContext';
@@ -24,7 +25,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <JotaiProvider>
+    <JotaiProvider store={authStore}>
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
           <EntitlementProvider>

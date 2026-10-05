@@ -75,4 +75,8 @@ export const authApi = {
   updateTier: (tier: 'FREE' | 'PRO' | 'ULTIMATE'): Promise<ApiResponse<UserProfile>> => {
     return apiRequest('/api/v1/users/tier', 'POST', { tier });
   },
+
+  withdraw: (): Promise<ApiResponse<null>> => {
+    return apiRequest('/api/v1/users/withdraw', 'POST');
+  },
 };

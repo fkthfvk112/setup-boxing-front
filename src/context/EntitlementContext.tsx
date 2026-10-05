@@ -1,17 +1,27 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useAtomValue } from 'jotai';
 import {
   EntitlementTier,
   getTierLimits,
   TierLimits,
 } from '../constants/Entitlements';
-import { getUserProfile, UserProfileData, getUserTier, saveUserTier } from '../utils/webDb';
+import {
+  accessTokenAtom,
+  authStore,
+  clearAuthSession,
+  updateSessionUser,
+  userProfileAtom,
+} from '../stores/authAtom';
+import { UserProfile } from '../types/combo';
+import { getUserProfile, getUserTier, saveUserTier, UserProfileData } from '../utils/webDb';
 
 interface EntitlementContextValue {
   tier: EntitlementTier;
   user: UserProfileData | null;
   isAuthenticated: boolean;
+  authReady: boolean;
   isGuest: boolean;
   isPro: boolean;
   isUltimate: boolean;
@@ -26,36 +36,75 @@ interface EntitlementContextValue {
   closeAuthModal: () => void;
   setTier: (tier: EntitlementTier) => Promise<void>;
   refreshUser: () => Promise<void>;
+  logout: () => void;
 }
 
 const EntitlementContext = createContext<EntitlementContextValue | null>(null);
 
+function toUserProfileData(profile: UserProfile): UserProfileData {
+  return {
+    userId: String(profile.userId ?? profile.id ?? ''),
+    email: String(profile.email ?? ''),
+    userName: profile.userName || profile.nickname || '복서',
+    provider: String(profile.provider || 'LOCAL'),
+    tier: profile.tier || 'FREE',
+  };
+}
+
+function toSessionUser(profile: UserProfileData, prev: UserProfile | null): UserProfile {
+  return {
+    id: prev?.id ?? (Number(profile.userId) || 0),
+    userId: profile.userId,
+    email: profile.email,
+    userName: profile.userName,
+    nickname: prev?.nickname,
+    profileImageUrl: prev?.profileImageUrl,
+    provider: profile.provider,
+    tier: profile.tier,
+    language: prev?.language,
+    country: prev?.country,
+    timezone: prev?.timezone,
+  };
+}
+
 export function EntitlementProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserProfileData | null>(null);
-  const [tier, setTierState] = useState<EntitlementTier>('FREE');
+  const accessToken = useAtomValue(accessTokenAtom);
+  const sessionUser = useAtomValue(userProfileAtom);
+  const [authReady, setAuthReady] = useState(false);
+  const [guestTier, setGuestTier] = useState<EntitlementTier>('FREE');
   const [isPaywallVisible, setIsPaywallVisible] = useState(false);
   const [paywallReason, setPaywallReason] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalReason, setAuthModalReason] = useState<string | null>(null);
 
   const refreshUser = useCallback(async () => {
-    try {
-      const userProf = await getUserProfile();
-      if (userProf) {
-        setUser(userProf);
-        setTierState(userProf.tier);
-        return;
-      }
-    } catch {}
+    const tokenAtStart = authStore.get(accessTokenAtom);
+    if (!tokenAtStart) {
+      setGuestTier(await getUserTier());
+      return;
+    }
 
-    setUser(null);
-    const savedTier = await getUserTier();
-    setTierState(savedTier);
+    const profile = await getUserProfile();
+    if (authStore.get(accessTokenAtom) !== tokenAtStart) return;
+    if (!profile) return;
+
+    updateSessionUser(toSessionUser(profile, authStore.get(userProfileAtom)));
   }, []);
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    setAuthReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+    void refreshUser();
+  }, [authReady, accessToken, refreshUser]);
+
+  useEffect(() => {
+    if (!accessToken) return;
+    setIsAuthModalOpen(false);
+    setAuthModalReason(null);
+  }, [accessToken]);
 
   const openPaywall = useCallback((reason?: string) => {
     setPaywallReason(reason || null);
@@ -78,13 +127,29 @@ export function EntitlementProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const setTier = useCallback(async (newTier: EntitlementTier) => {
-    setTierState(newTier);
+    const token = authStore.get(accessTokenAtom);
+    const current = authStore.get(userProfileAtom);
+    if (token && current) {
+      updateSessionUser({ ...current, tier: newTier });
+    } else {
+      setGuestTier(newTier);
+    }
     await saveUserTier(newTier);
     await refreshUser();
   }, [refreshUser]);
 
-  const isAuthenticated = user !== null;
+  const logout = useCallback(() => {
+    clearAuthSession();
+    void getUserTier().then(setGuestTier);
+  }, []);
+
+  const user = useMemo(
+    () => (authReady && accessToken && sessionUser ? toUserProfileData(sessionUser) : null),
+    [authReady, accessToken, sessionUser]
+  );
+  const isAuthenticated = authReady && !!accessToken;
   const isGuest = !isAuthenticated;
+  const tier: EntitlementTier = (authReady && accessToken && sessionUser?.tier) || guestTier;
   const isPro = tier === 'PRO' || tier === 'ULTIMATE';
   const isUltimate = tier === 'ULTIMATE';
   const limits = getTierLimits(tier, isGuest);
@@ -95,6 +160,7 @@ export function EntitlementProvider({ children }: { children: React.ReactNode })
         tier,
         user,
         isAuthenticated,
+        authReady,
         isGuest,
         isPro,
         isUltimate,
@@ -109,6 +175,7 @@ export function EntitlementProvider({ children }: { children: React.ReactNode })
         closeAuthModal,
         setTier,
         refreshUser,
+        logout,
       }}
     >
       {children}

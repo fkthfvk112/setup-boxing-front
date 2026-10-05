@@ -4,18 +4,13 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Flame, Layers, Calendar, Crown, User, LogOut } from 'lucide-react';
-import { useEntitlements } from '../../hooks/useEntitlements';
+import { useEntitlements } from '../../context/EntitlementContext';
 import { useI18n } from '../../hooks/useI18n';
-import { useAtom, useAtomValue } from 'jotai';
-import { isAuthenticatedAtom, logoutActionAtom, userProfileAtom } from '../../stores/authAtom';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { t, language, setLanguage } = useI18n();
-  const { tier, isPro, openPaywall } = useEntitlements();
-  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
-  const userProfile = useAtomValue(userProfileAtom);
-  const [, logout] = useAtom(logoutActionAtom);
+  const { tier, openPaywall, isAuthenticated, user, logout } = useEntitlements();
 
   const navItems = [
     { href: '/', label: t('tabHome'), icon: Flame },
@@ -97,10 +92,10 @@ export default function Navbar() {
           </button>
 
           {/* User Auth Menu */}
-          {isAuthenticated && userProfile ? (
+          {isAuthenticated && user ? (
             <div className="flex items-center gap-2 pl-2 border-l border-dark-border">
               <span className="hidden sm:inline-block text-xs font-semibold text-slate-300">
-                {userProfile.userName || userProfile.userId}
+                {user.userName || user.userId}
               </span>
               <button
                 onClick={() => logout()}

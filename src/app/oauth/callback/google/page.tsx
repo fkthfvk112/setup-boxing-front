@@ -10,7 +10,7 @@ import { showAlert } from '../../../../utils/swal';
 
 import { useI18n } from '../../../../hooks/useI18n';
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, loginAction] = useAtom(loginActionAtom);
@@ -89,5 +89,13 @@ export default function GoogleCallbackPage() {
         {t('pleaseWait')}
       </p>
     </div>
+  );
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <React.Suspense fallback={<div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center"><Loader2 className="w-10 h-10 text-[#FF2E54] animate-spin" /></div>}>
+      <GoogleCallbackContent />
+    </React.Suspense>
   );
 }
